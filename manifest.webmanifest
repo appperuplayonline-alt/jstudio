@@ -1,7 +1,7 @@
 {
   "name": "J Studio",
   "short_name": "J Studio",
-  "start_url": "./index_J_Studio_metadata_with_art_pwa.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#00008B",
   "theme_color": "#00008B",
