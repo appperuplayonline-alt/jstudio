@@ -1,0 +1,20 @@
+{
+  "name": "J Studio",
+  "short_name": "J Studio",
+  "start_url": "./index_J_Studio_metadata_with_art_pwa.html",
+  "display": "standalone",
+  "background_color": "#00008B",
+  "theme_color": "#00008B",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
