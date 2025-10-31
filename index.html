@@ -744,7 +744,7 @@ object-fit: cover; object-position: center;}
     top: -300px; /* subido 300px */
     left: -5%;   /* centrar el zoom */
 }
-#artista, #cancion { color: #FFFFFF; }
+#artista, #cancion { color: #00008B; }
 
 @media screen and (max-width: 768px) {
   body, html { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
@@ -763,7 +763,7 @@ window.__lastSongKey = window.__lastSongKey || "";
 </script>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<link rel="apple-touch-icon" href="https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg"/>
+<link href="icons/icon-192.png" rel="apple-touch-icon"/>
 <style>
 /* --- PWA Install UI (injetado) --- */
 #pwaInstallOverlay{
@@ -804,7 +804,7 @@ window.__lastSongKey = window.__lastSongKey || "";
 @keyframes pwaFloat{
   0%{ transform:translateY(0) } 50%{ transform:translateY(-6px) } 100%{ transform:translateY(0) }
 }
-#artista, #cancion { color: #FFFFFF; }
+#artista, #cancion { color: #00008B; }
 
 @media screen and (max-width: 768px) {
   body, html { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
@@ -838,7 +838,7 @@ button.btn-ghost{
   color:#fff; border: 4px solid white;
   cursor:pointer;
 }
-#artista, #cancion { color: #FFFFFF; }
+#artista, #cancion { color: #00008B; }
 
 @media screen and (max-width: 768px) {
   body, html { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
@@ -847,8 +847,7 @@ button.btn-ghost{
 }
 
 video { object-fit: cover; transform: scale(1.25); transition: transform 0.3s ease; }
-</style><link href="manifest.webmanifest" rel="manifest"/><meta content="#000000" name="theme-color"/><link rel="icon" type="image/png" href="https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg"/>
-</head>
+</style><link href="manifest.webmanifest" rel="manifest"/><meta content="#000000" name="theme-color"/></head>
 <body>
 <div class="web-side-panel" id="webSidePanel">
 <div class="web-side-close-layer" id="webSideCloseLayer"></div>
@@ -915,8 +914,8 @@ video { object-fit: cover; transform: scale(1.25); transition: transform 0.3s ea
 </svg>
 </div>
 <div class="web-texto" id="webTexto">
-<div id="artista"></div>
-<div id="cancion"></div>
+<div id="artista" style="color:#00008B;"></div>
+<div id="cancion" style="color:#00008B;"></div>
 </div>
 <!-- Redes Sociales -->
 <div class="redes-sociales">
@@ -1690,59 +1689,166 @@ if ('serviceWorker' in navigator) {
     .then(() => console.log('Service Worker registrado.'));
 }
 </script>
-<!-- METADATA DE CANCIÓN ACTUAL -->
-<!-- METADATA DE CANCIÓN ACTUAL -->
-<!-- METADATA DE CANCIÓN ACTUAL (API SONIC CON PROXY CORS) -->
+
+<!-- METADATA ZENO RADIO EN VIVO -->
 <div id="metadata" style="text-align:center; margin-top:20px;">
-<img alt="Portada" height="150" id="art" src="https://sonic.dattassd.com/cp/musiclibrary/nocover.png" style="border-radius:10px; box-shadow:0 0 10px #000;" width="150"/>
-<div id="songtitle" style="margin-top:10px; font-size:18px; font-weight:bold; color:#fff;">
-       Cargando canción...
-  </div>
+  <img id="art" src="https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg" width="150" height="150" style="border-radius:10px; box-shadow:0 0 10px #000;">
+  <div id="songtitle" style="color:#00008B;" style="margin-top:10px; font-size:18px; font-weight:bold; color:#fff;">Conectando a Zeno Radio...</div>
 </div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const apiUrl = encodeURIComponent("https://sonic.dattassd.com/cp/get_info.php?p=8084");
-  const proxyUrl = "https://api.allorigins.win/get?url=" + apiUrl;
+document.addEventListener("DOMContentLoaded", () => {
+  const audio = document.getElementById("audioPlayer");
+  const eventSource = new EventSource("https://api.zeno.fm/mounts/metadata/subscribe/ini156d8bm4vv");
+  const songTitleEl = document.getElementById("songtitle");
+  const artEl = document.getElementById("art");
+  const artistaEl = document.getElementById("artista");
+  const cancionEl = document.getElementById("cancion");
+  const DEFAULT_ART = "https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg";
 
-  async function actualizarMetadata() {
+  eventSource.onmessage = (event) => {
     try {
-      const response = await fetch(proxyUrl + "&_=" + new Date().getTime());
-      const dataWrapped = await response.json();
-      const data = JSON.parse(dataWrapped.contents);
+      const data = JSON.parse(event.data);
+      if (!data.streamTitle) return;
+      const titulo = data.streamTitle.trim();
+      songTitleEl.textContent = titulo;
 
-      let texto = "";
-      if (data.nowplaying && data.nowplaying.trim() !== "") {
-        texto = data.nowplaying;
-      } else if (data.title && data.title.trim() !== "") {
-        texto = data.title;
-      } else if (data.history && data.history.length > 0) {
-        texto = data.history[0].replace(/<br>/g, "").trim();
+      // Separar artista y canción
+      const partes = titulo.split(" - ");
+      let artista = "J Studio", cancion = titulo;
+      if (partes.length >= 2) {
+        artista = partes[0].trim();
+        cancion = partes.slice(1).join(" - ").trim();
       }
+      artistaEl.textContent = artista;
+      cancionEl.textContent = cancion;
 
-      if (texto.includes(" - ")) {
-        const partes = texto.split(" - ");
-        document.getElementById("artista").textContent = partes[0].trim();
-        document.getElementById("cancion").textContent = partes.slice(1).join(" - ").trim();
-      } else {
-        document.getElementById("artista").textContent = "J Studio";
-        document.getElementById("cancion").textContent = texto || "Transmitiendo en vivo...";
-      }
+      // Buscar carátula vía proxy libre (para evitar CORS)
+      const q = encodeURIComponent(titulo);
+      const url = `https://itunes.apple.com/search?term="https://itunes.apple.com/search?term=" + q + "&media=music&limit=1")}`;
+      fetch(url)
+        .then(r => r.json())
+        .then(wrapper => {
+          try {
+            const j = JSON.parse(wrapper.contents);
+            if (j.results && j.results.length > 0) {
+              const art100 = j.results[0].artworkUrl100;
+              if (art100) {
+                const bigCover = art100.replace("100x100bb", "512x512bb");
+                artEl.src = bigCover;
+                document.querySelector(".logo")?.setAttribute("src", bigCover);
+                document.querySelector(".menu-logo")?.setAttribute("src", bigCover);
+                updateMediaSession(cancion, artista, bigCover);
+                return;
+              }
+            }
+          } catch (e) { console.warn("Error parsing iTunes result", e); }
+          artEl.src = DEFAULT_ART;
+          document.querySelector(".logo")?.setAttribute("src", DEFAULT_ART);
+          document.querySelector(".menu-logo")?.setAttribute("src", DEFAULT_ART);
+          updateMediaSession(cancion, artista, DEFAULT_ART);
+        })
+        .catch(() => {
+          artEl.src = DEFAULT_ART;
+          document.querySelector(".logo")?.setAttribute("src", DEFAULT_ART);
+          document.querySelector(".menu-logo")?.setAttribute("src", DEFAULT_ART);
+          updateMediaSession(cancion, artista, DEFAULT_ART);
+        });
 
-      const art = data.art && data.art.trim() !== "" 
-        ? data.art 
-        : "https://sonic.dattassd.com/cp/musiclibrary/nocover.png";
-      document.getElementById("art").src = art;
+    } catch (err) {
+      console.error("Error procesando metadata Zeno:", err);
+    }
+  };
 
-    } catch (error) {
-      console.error("Error al obtener metadata:", error);
-      document.getElementById("artista").textContent = "Sin conexión";
-      document.getElementById("cancion").textContent = "";
-      document.getElementById("art").src = "https://sonic.dattassd.com/cp/musiclibrary/nocover.png";
+  eventSource.onerror = () => {
+    songTitleEl.textContent = "Sin conexión a Zeno Radio...";
+    artEl.src = DEFAULT_ART;
+  };
+
+  function updateMediaSession(title, artist, artworkSrc) {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: title || "J Studio",
+        artist: artist || "Radio en vivo",
+        album: "J Studio Radio",
+        artwork: [
+          { src: artworkSrc, sizes: "96x96", type: "image/png" },
+          { src: artworkSrc, sizes: "192x192", type: "image/png" },
+          { src: artworkSrc, sizes: "512x512", type: "image/png" }
+        ]
+      });
+      navigator.mediaSession.setActionHandler("play", () => audio.play());
+      navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+      navigator.mediaSession.setActionHandler("stop", () => audio.pause());
+    } catch (e) {
+      console.warn("MediaSession error:", e);
     }
   }
-
-  actualizarMetadata();
-  setInterval(actualizarMetadata, 10000);
 });
-</script></body>
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const DEFAULT_ART = "https://i.postimg.cc/YjK5pJ9Y/IMG-20251022-WA0027.jpg";
+  const eventSource = new EventSource("https://api.zeno.fm/mounts/metadata/subscribe/ini156d8bm4vv");
+  const artEl = document.getElementById("art");
+  const logoEl = document.querySelector(".logo");
+  const menuLogo = document.querySelector(".menu-logo");
+  const artistaEl = document.getElementById("artista");
+  const cancionEl = document.getElementById("cancion");
+
+  async function getCover(artist, song) {
+    try {
+      const q = encodeURIComponent(`${artist} ${song}`);
+      const r = await fetch(`https://itunes.apple.com/search?term=${q}&media=music&limit=1`);
+      const j = await r.json();
+      if (j.results?.length) {
+        return j.results[0].artworkUrl100.replace("100x100bb", "512x512bb");
+      }
+    } catch (e) { console.warn("Error al obtener carátula:", e); }
+    return DEFAULT_ART;
+  }
+
+  eventSource.onmessage = async (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (!data.streamTitle) return;
+
+      let artista = "J Studio", cancion = data.streamTitle;
+      const partes = data.streamTitle.split(" - ");
+      if (partes.length >= 2) {
+        artista = partes[0].trim();
+        cancion = partes.slice(1).join(" - ").trim();
+      }
+
+      artistaEl.textContent = artista;
+      cancionEl.textContent = cancion;
+
+      const cover = await getCover(artista, cancion);
+
+      // 🔥 Forzar la carátula en todos los elementos
+      [artEl, logoEl, menuLogo].forEach(el => {
+        if (el) {
+          el.src = cover;
+          el.setAttribute("src", cover);
+        }
+      });
+
+      // Reforzar cada 3 segundos (por si otro script la reemplaza)
+      setInterval(() => {
+        [artEl, logoEl, menuLogo].forEach(el => {
+          if (el && el.src !== cover) el.src = cover;
+        });
+      }, 3000);
+
+    } catch (err) {
+      console.error("Error en metadata:", err);
+      if (artEl) artEl.src = DEFAULT_ART;
+    }
+  };
+});
+</script>
+
+</body>
 </html>
